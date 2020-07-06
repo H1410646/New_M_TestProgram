@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization.Configuration;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace 批量验证程序V1._0
@@ -32,8 +33,17 @@ namespace 批量验证程序V1._0
         public string[] TitleColumn { get; set; }
 
 
+        /// <summary>
+        /// 基础数据表(10*10)
+        /// </summary>
         public Workbook wkten { get; set; }
-        
+
+
+        /// <summary>
+        /// 结果导出表
+        /// </summary>
+        public Workbook wkResult { get; set; }
+
         /// <summary>
         /// 获取标题行名及确定列名，赛车为1-10，时时彩0-9
         /// </summary>
@@ -163,7 +173,6 @@ namespace 批量验证程序V1._0
         }
 
 
-
         /// <summary>
         /// 筛选数据，通过com接口直接筛选Excel中的数据
         /// </summary>
@@ -177,11 +186,10 @@ namespace 批量验证程序V1._0
 
             object[,] tempData= st.Range[st.Cells[2, 1], st.Cells[exEndRow, 3]].SpecialCells(XlCellType.xlCellTypeVisible).Value;
 
-            //st.UsedRange.AutoFilter(2);
+            st.UsedRange.AutoFilter(2);
 
             return tempData;
         }
-
 
 
         //public void test(DateTime stt,DateTime ent)
@@ -201,8 +209,6 @@ namespace 批量验证程序V1._0
 
 
         //private int[,] GetTen()
-
-
 
 
         /// <summary>
@@ -236,8 +242,6 @@ namespace 批量验证程序V1._0
             return TenFive;
         }
         
-
-
 
         /// <summary>
         /// 根据10*10生成对应的筛选数据表。
@@ -283,9 +287,70 @@ namespace 批量验证程序V1._0
         }
 
 
-        
         /// <summary>
-        /// 导出数组到Excel中。
+        /// 用过滤数据测试目标数据，生成单独赛道的数据
+        /// </summary>
+        /// <param name="Dataarr"></param>
+        /// <param name="Basearr"></param>
+        /// <param name="TargetSD"></param>
+        /// <returns></returns>
+        private object[,] TestTargetWithBase(object[,] Dataarr,int[,] Basearr,int TargetSD)
+        {
+            int[] SDData = new int[Dataarr.GetLength(0)];
+            object[,] temparr = new object[Dataarr.GetLength(0), 2];
+            for (int i = 1; i < Dataarr.GetLength(0); i++)
+            {
+                SDData[i-1]= int.Parse(Dataarr[i, 3].ToString().Split(new char[] { ',' })[TargetSD]);
+                SDData[i] = int.Parse(Dataarr[i+1, 3].ToString().Split(new char[] { ',' })[TargetSD]);
+                //int r1 = SDData[i - 1];
+                //int c1 = SDData[i];
+                for (int j = 0; j < Basearr.GetLength(1); j++)
+                {
+                    if (Basearr[SDData[i-1],j]==SDData[i])
+                    {
+                        if (i==1)
+                        {
+                            temparr[i - 1, 0] = 1;
+                        }
+                        else
+                        {
+                            temparr[i - 1, 0] = (int)temparr[i - 2, 0] + 1;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        temparr[i - 1,0] =0;
+                    }
+                }
+
+            }
+            
+
+            return temparr;
+        }
+
+
+
+        public object[,] CountTestResult(object[,] TargetArr)
+        {
+
+            object[,] CountArr = new object[500, 2];
+            for (int i = 0; i < CountArr.GetLength(0); i++)
+            {
+                CountArr[i, 0] = 0;
+            }
+            for (int i = 0; i < TargetArr.GetLength(0)-1; i++)
+            {
+                
+                CountArr[int.Parse(TargetArr[i, 0].ToString()), 0] = (int)CountArr[int.Parse(TargetArr[i, 0].ToString()), 0]+ 1;
+            }
+            return CountArr;
+        }
+
+
+        /// <summary>
+        /// 导出数组到Excel中。本方法操作基础数据汇总及筛选结果导出。
         /// </summary>
         /// <param name="arr">需要导出的数组</param>
         /// <param name="Frow">导出的位置所在行</param>
@@ -293,19 +358,19 @@ namespace 批量验证程序V1._0
         /// <param name="Flines">标题行内容</param>
         /// <param name="fpath">地址及文件名</param>
         /// <param name="SheetIndex">导出的工作表的索引</param>
-        public void ExportDataToEx(int[,] arr,int Frow,int Fcol,string bt,int SheetIndex)
+        public void ExportDataToEx(int[,] arr1,int Frow,int Fcol,string bt,int SheetIndex)
         {
             //Workbook wks = File.Exists(fpath) ? OpenWK(fpath) : CreateWk(fpath);
 
             Worksheet wst = wkten.Sheets[SheetIndex];
             string[,] TitleRow =GetTitleLine(MaxNum);
-            int ColCount = arr.GetLength(1);
+            int ColCount = arr1.GetLength(1);
             wst.Cells[Frow, Fcol].Value =bt;
             wst.Range[wst.Cells[Frow, Fcol +1 ], wst.Cells[Frow,Fcol+ColCount]].Value =TitleColumn;//TitleColumn
             wst.Range[wst.Cells[Frow+1, Fcol], wst.Cells[Frow+10, Fcol]].Value = TitleRow;//TitleRow
-            wst.Range[wst.Cells[Frow+1,Fcol+1], wst.Cells[Frow+10, Fcol+ColCount]].Value = arr;
+            wst.Range[wst.Cells[Frow+1,Fcol+1], wst.Cells[Frow+10, Fcol+ColCount]].Value = arr1;
             wst.Cells.EntireColumn.AutoFit();
-            wst.Cells.HorizontalAlignment = 2;
+            //wst.Cells.HorizontalAlignment = 2;
             //wst.Cells.VerticalAlignment = 2;
             //wst.Cells.EntireColumn.HorizontalAlignment=HorizontalAlignment.Center;
             //wst.Name = SheetIndex.ToString();
@@ -318,7 +383,45 @@ namespace 批量验证程序V1._0
 
 
 
-        public void GetBaseFilterData(bool sm,DateTime t1,DateTime t2,DateTime t3,DateTime t4,string fpath,int filterNum,int cycleNum)
+        /// <summary>
+        /// 导出数组到Excel中。本方法操作导出测试结果及统计结果。
+        /// </summary>
+        /// <param name="arr">需要导出的数组</param>
+        /// <param name="Frow">导出的位置所在行</param>
+        /// <param name="Fcol">导出位置所在列</param>
+        /// <param name="Flines">标题行内容</param>
+        /// <param name="fpath">地址及文件名</param>
+        /// <param name="SheetIndex">导出的工作表的索引</param>
+        public void ExportDataToEx(object[,] arr, int Frow, int Fcol, string bt, int SheetIndex)
+        {
+            Worksheet wst = wkResult.Sheets[SheetIndex];
+            if (Fcol==1)
+            {
+                string[,] TitleRow = GetTitleLine(MaxNum);
+                int ColCount = arr.GetLength(1);
+                int RowCount = arr.GetLength(0);
+                wst.Cells[Frow, Fcol].Value = bt;
+
+                //wst.Range[wst.Cells[Frow, Fcol + 1], wst.Cells[Frow, Fcol + ColCount]].Value = TitleColumn;//TitleColumn
+                //wst.Range[wst.Cells[Frow + 1, Fcol], wst.Cells[Frow + 10, Fcol]].Value = TitleRow;//TitleRow
+                wst.Range[wst.Cells[Frow + 1, 1], wst.Cells[Frow + RowCount,  ColCount]].Value = arr;
+                wst.Cells.EntireColumn.AutoFit();
+                wst.Range[wst.Cells[2, 2], wst.Cells[RowCount+1, 2]].NumberFormatLocal = "yyyy/mm/dd hh:mm";
+            }
+            else
+            {
+                wst.Cells[1, Fcol] = bt;
+                wst.Range[wst.Cells[2, Fcol], wst.Cells[1+arr.GetLength(0),Fcol]].Value = arr;
+
+            }
+
+
+
+        }
+
+
+
+        public void GetBaseFilterData(bool sm,DateTime t1,DateTime t2,DateTime t3,DateTime t4,int filterNum,int cycleNum)
         {
             //基础数据单日模式是周期内一天一个结果，多日模式是周期内只有一个结果。
 
@@ -331,51 +434,123 @@ namespace 批量验证程序V1._0
 
             //Workbook wkk = app.Workbooks[2];
             //MessageBox.Show(wkk.Name);
+            string basePath = string.Format(@"E:\制作\极速时时彩分析\测试文件目录\BaseData{0:HHmmss}.xlsx",
+                DateTime.Now);
+            string TestPath = string.Format(@"E:\制作\极速时时彩分析\测试文件目录\ResultData{0:HHmmss}.xlsx",
+                DateTime.Now);
             if (sm)
             {
-                wkten = CreateWk(fpath, cycleNum);
+                wkten = CreateWk(basePath, cycleNum);//新建基础数据表
 
+                wkResult = CreateWk(TestPath, cycleNum);//新建测试数据表
                 for (int i = 0; i < cycleNum; i++)
                 {
-                    t1 = t1.AddDays(i);
-                    t2 = t2.AddDays(i);
-                    t3 = t3.AddDays(i);
-                    t4 = t4.AddDays(i);
+                    object[,] TargetData = FilterData(t3, t4);
+
+
                     int[][,] BaseTen = GetTenFive(FilterData(t1, t2));//单日的基础数据是移到的
-                    //int[][,] FilterTen = GetFilterNum(FilterData(t1, t2));
+
+
+                    //目标文件保存到Exceldata中。用FilterData提取测试数据
+                    ExportDataToEx(TargetData, 1, 1, "", i + 1);
+
+                    //按赛道循环,基础数据，测试数据都是按赛道单独计算。最终统一生成。
                     for (int j = 0; j < BaseTen.GetLength(0); j++)
                     {
+                        int[,] FilterArr = GetFilterNum(BaseTen[j]);
+                        //导出赛道统计数据
                         ExportDataToEx(BaseTen[j], j * 11 + 1, 1, string.Format("第{0:D2}赛道10*10", LotSD[j] + 1), i + 1);
-                        ExportDataToEx(GetFilterNum( BaseTen[j]), j * 11 + 1, 13, string.Format("第{0:D2}赛道过滤数", LotSD[j] + 1), i + 1);
+
+                        //导出过滤数统计结果
+                        ExportDataToEx(FilterArr, j * 11 + 1, 13, string.Format("第{0:D2}赛道过滤数", LotSD[j] + 1), i + 1);
+
+                        ExportDataToEx(TestTargetWithBase(TargetData, FilterArr, LotSD[j]), 2, j + 4, string.Format("第{0}赛道", LotSD[j] + 1), i + 1);
+
+
                     }
-                    wkten.Worksheets[i + 1].Name = (i+1).ToString() ;
+
+                    wkten.Worksheets[i + 1].Name = (i + 1).ToString();//修改sheet名称为数字编号基础数据表10*10
+                    wkResult.Worksheets[i + 1].Name = (i + 1).ToString();//修改sheet名称为数字编号 测试数据表
+                    Worksheet wws = wkResult.Worksheets[i + 1];
+                    wws.Range[wws.Cells[1, 1], wws.Cells[1, 3]] = new string[] { "期号", "时间", "开奖号" };
+
+                    t1 = t1.AddDays(1);
+                    t2 = t2.AddDays(1);
+                    t3 = t3.AddDays(1);
+                    t4 = t4.AddDays(1);
                 }
             }
             else
             {
-                wkten = CreateWk(fpath, 1);
+                wkten = CreateWk(basePath, 1);//新建基础数据表
+                wkResult = CreateWk(TestPath, cycleNum);//新建测试数据表
+
                 int[][,] BaseTen = GetTenFive(FilterData(t1, t2));//多日的基础数据是固定的
-                //因此不用循环
-                //string fpath = string.Format(@"E:\制作\极速时时彩分析\测试文件目录\btExporttest{0:HHmmss}.xlsx", DateTime.Now);//设定导出文件名及路径;
+                                                                  //因此不用循环
+                                                                  //string fpath = string.Format(@"E:\制作\极速时时彩分析\测试文件目录\btExporttest{0:HHmmss}.xlsx", DateTime.Now);//设定导出文件名及路径;
+
+
+                int[][,] FilterArr = new int[LotSD.GetLength(0)][,];
+                //按赛道循环,基础数据，测试数据都是按赛道单独计算。最终统一生成。
                 for (int i = 0; i < BaseTen.GetLength(0); i++)
                 {
                     //string bt = this.listBox1.Items[exCalc.LotSD[i]].ToString();
 
-                    ExportDataToEx(BaseTen[i], i * 11 + 1, 1,string.Format("第{0:D2}赛道10*10", LotSD[i]+1), 1);
-                    ExportDataToEx(GetFilterNum(BaseTen[i]), i * 11 + 1, 13, string.Format("第{0:D2}赛道过滤数", LotSD[i] + 1),  1);
+                    //导出赛道统计数据
+                    ExportDataToEx(BaseTen[i], i * 11 + 1, 1, string.Format("第{0:D2}赛道10*10", LotSD[i] + 1), 1);
 
+                    //导出过滤数统计结果
+                    ExportDataToEx(GetFilterNum(BaseTen[i]), i * 11 + 1, 13, string.Format("第{0:D2}赛道过滤数", LotSD[i] + 1), 1);
+                    FilterArr[i] = GetFilterNum(BaseTen[i]);
+                    //int[,] FilterArr = GetFilterNum(BaseTen[i]);
+                    //object[,] TargetData = FilterData(t3, t4);
+
+                    //for (int j = 0; j < cycleNum; j++)
+                    //{
+
+                    //    ExportDataToEx(TargetData, 1, 1, "", i + 1);
+                    //    ExportDataToEx(TestTargetWithBase(TargetData, FilterArr, LotSD[i]), 2, j + 4, string.Format("第{0}赛道", LotSD[j] + 1), i + 1);
+
+                    //}
+                    //Worksheet wws = wkResult.Worksheets[i + 1];
+                    //wws.Range[wws.Cells[1, 1], wws.Cells[1, 3]] = new string[] { "期号", "时间", "开奖号" };
                 }
+                string[,] RowTitle = new string[500, 2];
+                RowTitle[0, 0] = "挂次数";
+                for (int i = 1; i < RowTitle.GetLength(0); i++)
+                {
+                    RowTitle[i, 0] = i.ToString();
+                }
+
+                for (int i = 0; i < cycleNum; i++)
+                {
+                    Worksheet wws = wkResult.Worksheets[i + 1];
+                    object[,] TargetData = FilterData(t3, t4);
+                    ExportDataToEx(TargetData, 1, 1, "", i + 1);
+                    wws.Range[wws.Cells[1, 14], wws.Cells[500, 14]] = RowTitle;
+
+                    for (int j = 0; j < BaseTen.GetLength(0); j++)
+                    {
+                        object[,] ResultArr = TestTargetWithBase(TargetData, FilterArr[j], LotSD[j]);
+                        ExportDataToEx(ResultArr,2,j+4, string.Format("第{0}赛道", LotSD[j] + 1), i + 1);
+                        ExportDataToEx(CountTestResult(ResultArr),2,j+15, string.Format("第{0}赛道", LotSD[j] + 1), i + 1);
+                    }
+
+
+                    wws.Name = (i + 1).ToString();//修改sheet名称为数字编号 测试数据表
+                    wws.Range[wws.Cells[1, 1], wws.Cells[1, 3]] = new string[] { "期号", "时间", "开奖号" };
+                    t3 = t3.AddDays(1);
+                    t4 = t4.AddDays(1);
+                }
+
+                //多日测试只有一个基础数据因为不用添加多张sheet。
+
+
             }
             //这里已经得到基础数据了。工作薄不用关闭，后面接着存入过滤数据。
 
 
         }
-
-
-
-
-
-
 
 
         /// <summary>

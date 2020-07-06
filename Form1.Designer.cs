@@ -41,10 +41,10 @@
             this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.dateTimePicker3 = new System.Windows.Forms.DateTimePicker();
+            this.dateTimePicker4 = new System.Windows.Forms.DateTimePicker();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.dateTimePicker4 = new System.Windows.Forms.DateTimePicker();
+            this.dateTimePicker3 = new System.Windows.Forms.DateTimePicker();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
@@ -198,10 +198,10 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.dateTimePicker3);
+            this.groupBox4.Controls.Add(this.dateTimePicker4);
             this.groupBox4.Controls.Add(this.label2);
             this.groupBox4.Controls.Add(this.textBox1);
-            this.groupBox4.Controls.Add(this.dateTimePicker4);
+            this.groupBox4.Controls.Add(this.dateTimePicker3);
             this.groupBox4.Controls.Add(this.label5);
             this.groupBox4.Controls.Add(this.label4);
             this.groupBox4.Location = new System.Drawing.Point(75, 398);
@@ -211,15 +211,15 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "测试数据";
             // 
-            // dateTimePicker3
+            // dateTimePicker4
             // 
-            this.dateTimePicker3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.dateTimePicker3.CustomFormat = "yyyy-MM-dd HH:ss";
-            this.dateTimePicker3.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePicker3.Location = new System.Drawing.Point(139, 72);
-            this.dateTimePicker3.Name = "dateTimePicker3";
-            this.dateTimePicker3.Size = new System.Drawing.Size(200, 29);
-            this.dateTimePicker3.TabIndex = 18;
+            this.dateTimePicker4.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.dateTimePicker4.CustomFormat = "yyyy-MM-dd HH:ss";
+            this.dateTimePicker4.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTimePicker4.Location = new System.Drawing.Point(139, 72);
+            this.dateTimePicker4.Name = "dateTimePicker4";
+            this.dateTimePicker4.Size = new System.Drawing.Size(200, 29);
+            this.dateTimePicker4.TabIndex = 18;
             // 
             // label2
             // 
@@ -238,15 +238,15 @@
             this.textBox1.TabIndex = 22;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
-            // dateTimePicker4
+            // dateTimePicker3
             // 
-            this.dateTimePicker4.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.dateTimePicker4.CustomFormat = "yyyy-MM-dd HH:ss";
-            this.dateTimePicker4.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePicker4.Location = new System.Drawing.Point(139, 37);
-            this.dateTimePicker4.Name = "dateTimePicker4";
-            this.dateTimePicker4.Size = new System.Drawing.Size(200, 29);
-            this.dateTimePicker4.TabIndex = 17;
+            this.dateTimePicker3.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.dateTimePicker3.CustomFormat = "yyyy-MM-dd HH:ss";
+            this.dateTimePicker3.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTimePicker3.Location = new System.Drawing.Point(139, 37);
+            this.dateTimePicker3.Name = "dateTimePicker3";
+            this.dateTimePicker3.Size = new System.Drawing.Size(200, 29);
+            this.dateTimePicker3.TabIndex = 17;
             // 
             // label5
             // 
@@ -421,9 +421,9 @@
         private System.Windows.Forms.DateTimePicker dateTimePicker2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.DateTimePicker dateTimePicker3;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker dateTimePicker4;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.DateTimePicker dateTimePicker3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox1;

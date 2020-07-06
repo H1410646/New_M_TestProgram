@@ -80,7 +80,11 @@ namespace 批量验证程序V1._0
             for (int i = 0; i < LotCount; i++)
             {
                 this.listBox1.Items.Add(string.Format("第{0:D2}赛道", i+1));
-                if (i < LotCount - 1) { this.comboBox1.Items.Add((i + 1).ToString()); }
+                //if (i < LotCount - 1) { this.comboBox1.Items.Add((i + 1).ToString()); }
+            }
+            for (int i = 0; i <9; i++)
+            {
+                this.comboBox1.Items.Add((i + 1).ToString());
             }
         }
 
@@ -244,21 +248,21 @@ namespace 批量验证程序V1._0
         private void button1_Click(object sender, EventArgs e)
         {
             /// 判断参数是否已经设置
-            //if(string.IsNullOrEmpty(comboBox1.Text))
-            //{
-            //    MessageBox.Show("选择过滤基数");
-            //    return;
-            //}
-            //else if(listBox1.SelectedItems.Count==0)
-            //{
-            //    MessageBox.Show("请选择测试赛道");
-            //    return;
-            //}
-            //else if (string.IsNullOrEmpty(textBox1.Text))
-            //{
-            //    MessageBox.Show("请输入测试周期");
-            //    return;
-            //}
+            if (string.IsNullOrEmpty(comboBox1.Text))
+            {
+                MessageBox.Show("选择过滤基数");
+                return;
+            }
+            else if (listBox1.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("请选择测试赛道");
+                return;
+            }
+            else if (string.IsNullOrEmpty(textBox1.Text))
+            {
+                MessageBox.Show("请输入测试周期");
+                return;
+            }
 
             exCalc.LotCount = LotCount;//开奖号位数
 
@@ -268,8 +272,8 @@ namespace 批量验证程序V1._0
             int MaxNum = JSSC.Checked ? 10 : 9;
             exCalc.MaxNum = MaxNum;
 
-            this.comboBox1.Text = "3";
-            this.textBox1.Text = "5";
+            this.comboBox1.Text = this.comboBox1.Text;
+            this.textBox1.Text = this.textBox1.Text;
 
             exCalc.FilterCount = int.Parse(this.comboBox1.Text);
 
@@ -281,11 +285,19 @@ namespace 批量验证程序V1._0
             dateTimePicker1.Value = new DateTime(2020, 3, 1, 0, 0,0);
             dateTimePicker2.Value = new DateTime(2020, 3, 2, 23, 59,0);
 
+            dateTimePicker3.Value = new DateTime(2020, 4, 1, 0, 0, 0);
+            dateTimePicker4.Value = new DateTime(2020, 4, 5, 23, 59, 0);
+
+            
+            
+
+            ///把基础数据导出
             exCalc.GetBaseFilterData(SingleDayCheck.Checked, dateTimePicker1.Value, dateTimePicker2.Value, dateTimePicker3.Value, dateTimePicker4.Value,
-                string.Format(@"E:\制作\极速时时彩分析\测试文件目录\btExporttest{0:HHmmss}.xlsx",
-                DateTime.Now), int.Parse(this.comboBox1.Text), int.Parse(this.textBox1.Text));
+                 int.Parse(this.comboBox1.Text), int.Parse(this.textBox1.Text));
 
 
+            ///导出测试数据
+            ///测试数据由基础数据对应生成。因为在类中需要同步计算。
 
 
             //if (this.SingleDayCheck.Checked)
